@@ -11,29 +11,107 @@
 blocksize: 	.word 12
 elemPrompt:	.asciiz "Digite o novo elemento: "
 newLine:	.asciiz "\n"
+space:		.asciiz " "
+initMenu:	.asciiz "Digite o número correspondente à ação desejada: \n"
+opt1:		.asciiz "1) Inserção\n"
+opt2:		.asciiz "2) Percorrimento em pré-ordem\n"
+opt3:		.asciiz "3) Percorrimento em ordem\n"
+opt4:		.asciiz "4) Percorrimento em pós-ordem\n"
+opt5:		.asciiz "5) Saída\n"
+optWrong:	.asciiz "Entrada inválida! Digite novamente: "
+
 
 .text
 main:
-	jal createBinaryTree
-	
-	lw $s1, 0($v0)
-	la $a0, ($s1)
-	jal postorder
-	
+menu:
+	#Text printing
 	li $v0, 4
 	la $a0, newLine
-	syscall	
+	syscall
+
+	#Text printing
+	li $v0, 4
+	la $a0, initMenu
+	syscall
 	
+	#Text printing
+	li $v0, 4
+	la $a0, opt1
+	syscall
+
+	#Text printing
+	li $v0, 4
+	la $a0, opt2
+	syscall	
+		
+	#Text printing
+	li $v0, 4
+	la $a0, opt3
+	syscall			
+
+	#Text printing
+	li $v0, 4
+	la $a0, opt4
+	syscall			
+
+	#Text printing
+	li $v0, 4
+	la $a0, opt5
+	syscall		
+	
+	#Catching the selected option
+	li $v0, 5
+	syscall
+	move $t5, $v0
+	
+	beq $t5, 1, OptInsert
+	beq $t5, 2, OptPreOrder
+	beq $t5, 3, OptInOrder
+	beq $t5, 4, OptPostOrder
+	beq $t5, 5, OptExit
+	j OptWrong
+
+OptInsert:
+	jal createBinaryTree
+	lw $s1, 0($v0)	
+	j menu
+			
+OptPreOrder:			
 	la $a0, ($s1)
 	jal preorder
 	
 	li $v0, 4
 	la $a0, newLine
 	syscall
+	j menu
 
+OptInOrder:
 	la $a0, ($s1)
 	jal inorder
 
+	li $v0, 4
+	la $a0, newLine
+	syscall
+	j menu
+
+OptPostOrder:																																																				
+	la $a0, ($s1)
+	jal postorder
+	
+	li $v0, 4
+	la $a0, newLine
+	syscall	
+	j menu
+
+OptWrong:
+	#Text printing
+	li $v0, 4
+	la $a0, optWrong
+	syscall
+		
+	j menu
+
+OptExit:		
 	li $v0, 10	# exit
 	syscall
 
@@ -117,7 +195,7 @@ preorder:
 	syscall	
 	
 	li $v0, 4
-	la $a0, newLine
+	la $a0, space
 	syscall
 
 	lw $a0, 4($s0)	# address of the left tree
@@ -168,7 +246,7 @@ postorder:
 	syscall	
 	
 	li $v0, 4
-	la $a0, newLine
+	la $a0, space
 	syscall
 	
 POEnd:
@@ -198,7 +276,7 @@ inorder:
 	syscall	
 	
 	li $v0, 4
-	la $a0, newLine
+	la $a0, space
 	syscall
 	
 	lw $a0, 8($s0)	# address of the right tree
