@@ -16,9 +16,23 @@ newLine:	.asciiz "\n"
 main:
 	jal createBinaryTree
 	
-	lw $a0, 0($v0)
-	
+	lw $s1, 0($v0)
+	la $a0, ($s1)
 	jal postorder
+	
+	li $v0, 4
+	la $a0, newLine
+	syscall	
+	
+	la $a0, ($s1)
+	jal preorder
+	
+	li $v0, 4
+	la $a0, newLine
+	syscall
+
+	la $a0, ($s1)
+	jal inorder
 
 	li $v0, 10	# exit
 	syscall
@@ -90,6 +104,43 @@ BTEnd:
 	jr $ra
 
 # $a0 : tree address
+preorder:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	beqz $a0, PreEnd
+	
+	la $s0, ($a0)
+
+	li $v0, 1
+	lw $a0, 0($s0)
+	syscall	
+	
+	li $v0, 4
+	la $a0, newLine
+	syscall
+
+	lw $a0, 4($s0)	# address of the left tree
+	addi $sp, $sp, -4
+	sw $s0, 0($sp)
+	jal preorder
+	lw $s0, 0($sp)
+	addi $sp, $sp, 4
+	
+	lw $a0, 8($s0)	# address of the right tree
+	addi $sp, $sp, -4
+	sw $s0, 0($sp)
+	jal preorder
+	lw $s0, 0($sp)
+	addi $sp, $sp, 4
+	
+PreEnd:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	
+	jr $ra
+
+# $a0 : tree address
 postorder:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
@@ -121,6 +172,43 @@ postorder:
 	syscall
 	
 POEnd:
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	
+	jr $ra
+
+# $a0 : tree address
+inorder:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	beqz $a0, InEnd
+	
+	la $s0, ($a0)
+
+	lw $a0, 4($s0)	# address of the left tree
+	addi $sp, $sp, -4
+	sw $s0, 0($sp)
+	jal inorder
+	lw $s0, 0($sp)
+	addi $sp, $sp, 4
+	
+	li $v0, 1
+	lw $a0, 0($s0)
+	syscall	
+	
+	li $v0, 4
+	la $a0, newLine
+	syscall
+	
+	lw $a0, 8($s0)	# address of the right tree
+	addi $sp, $sp, -4
+	sw $s0, 0($sp)
+	jal inorder
+	lw $s0, 0($sp)
+	addi $sp, $sp, 4
+
+InEnd:
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
 	
