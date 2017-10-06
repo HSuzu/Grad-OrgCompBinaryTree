@@ -120,7 +120,6 @@ OptPostOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptWrong:
-	#Text printing
 	li $v0, 4		# Imprime a string correspondente ao recebimento de uma entrada fora do padrão definido pelo
 	la $a0, optWrong	# pelo menu inicial.
 	syscall
@@ -131,12 +130,12 @@ OptExit:
 	li $v0, 10		# Caso o rótulo de saída seja escolhido, o programa é encerrado.
 	syscall
 
-# return $v0 tree address
-createBinaryTree:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+
+createBinaryTree:		# Este rótulo retorna em $v0 o endereço da árvore binária.
+	addi $sp, $sp, -4	# Avança uma posição na pilha para garantir que a posição de inserção não esteja ocupada.
+	sw $ra, 0($sp)		# Atualiza o enderço de retorno na pilha para que ele não seja reescrito.
 	
-	li $a0, 8
+	li $a0, 8		
 	li $v0, 9
 	syscall
 	
