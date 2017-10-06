@@ -87,46 +87,48 @@ menu:
 
 OptInsert:
 	la $a0, ($s1)
-	jal insert
-	j menu
+	jal insert		# Faz um salto para o rótulo de inserção de elementos e salva em $ra o endereço de retorno.
+	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 			
 OptPreOrder:			
-	lw $a0, ($s1)
-	jal preorder
+	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	jal preorder		# Faz um salto para o rótulo de percorrimento em pré-ordem e salva em $ra o endereço de retorno.
 	
-	li $v0, 4
+	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
 	la $a0, newLine
 	syscall
-	j menu
+	
+	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptInOrder:
-	lw $a0, ($s1)
-	jal inorder
+	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	jal inorder		# Faz um salto para o rótulo de percorrimento em ordem e armazena em $ra o endereço de retorno.
 
-	li $v0, 4
+	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
 	la $a0, newLine
 	syscall
-	j menu
-
-OptPostOrder:																																																				
-	lw $a0, ($s1)
-	jal postorder
 	
-	li $v0, 4
+	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
+
+OptPostOrder:
+	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI.
+	jal postorder		# Faz um salto para o rótulo de percorrimento em pós-ordem e registra em $ra o endereço de retorno.
+	
+	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
 	la $a0, newLine
 	syscall	
-	j menu
+	
+	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptWrong:
-	#Text printing
-	li $v0, 4
-	la $a0, optWrong
+	li $v0, 4		# Imprime a string correspondente ao recebimento de uma entrada fora do padrão definido pelo
+	la $a0, optWrong	# pelo menu inicial.
 	syscall
-	
-	j menu
+		
+	j menu			# Retorna para o menu inicial.
 
 OptExit:		
-	li $v0, 10	# exit
+	li $v0, 10		# Caso o rótulo de saída seja escolhido, o programa é encerrado.
 	syscall
 
 # return $v0 tree address
