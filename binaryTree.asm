@@ -219,62 +219,69 @@ BTEnd:
 	
 	jr $ra			# Retorna para $ra.
 
+				# Rótulo para o percorrimento em pré-ordem.
 preorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
-	la $t0, ($a0)
+	la $t0, ($a0)		# Copia para $t0 o endereço da árvore binária armazenado em $a0.
 
-	la $a0, preOrderCall
+	la $a0, preOrderCall	# Impressão de texto do tipo de percorrimento escolhido.
 	li $v0, 4
 	syscall
 	
-	lw $a0, 0($t0)
+	lw $a0, 0($t0)		# Armazena em $a0 o valor do elemento correspondente ao primeiro nó da árvore.
 
-	bne $a0, $zero, preOrderRun
+	bne $a0, $zero, preOrderRun # Caso o elemento não seja zero, a árvore não está vazia e um desvio condicional
+				    # é feito para o rótulo correspondente ao início do percorrimento em pré-ordem.
 	
-	la $a0, emptyTreeError
-	li $v0, 4
+	la $a0, emptyTreeError  # Do contrário, a árvore está vazia e um texto é impresso para que o usuário tenha
+	li $v0, 4		# conhecimento da informação.
 	syscall
 	
-	jr $ra
+	jr $ra			# Retorna o usuário para o menu inicial.
 	
 preOrderRun:
-	lw $a1, 4($t0)
-	lw $a0, 0($t0)
+	lw $a1, 4($t0)		# Armazena em $a1 o valor correspondente ao número de endereços da árvore binária.
+	lw $a0, 0($t0)		#[Testar se faz falta] Armazena em $a0 o valor do elemento correspondete ao primeiro nó da árvore.
 	
 preOrderLoop:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $ra, 0($sp)		# Armazena em $sp o endereço de retorno armazenado em $ra.
 	
-	beqz $a0, PreEnd
+	beqz $a0, PreEnd	# Faz um desvio caso o valor do elemento atual armazenado em $a0 seja igual a 0.
+				# Neste caso, o percorrimento chegou a uma folha.
 	
-	la $s0, ($a0)
+	la $s0, ($a0)		# Armazena em $s0 o endereço do elemento $a0.
 
-	la $a0, 0($s0)
-	addi $a1, $a1, -1
-	jal print_elem
+	la $a0, 0($s0)		#[Testar se faz falta]
+	addi $a1, $a1, -1	# Decrementa o número de nós da árvore para simbolizar que o nó foi visitado.
+	jal print_elem		# Faz um desvio para o rótulo que imprime o elemento e salva o endereço de retorno em $ra.
 
-	lw $a0, 4($s0)	# address of the left tree
-	addi $sp, $sp, -4
-	sw $s0, 0($sp)
-	jal preOrderLoop
-	lw $s0, 0($sp)
-	addi $sp, $sp, 4
+	lw $a0, 4($s0)		# Carrega em $a0 o endereço da árvore da esquerda.
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
+	jal preOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço
+				# de retorno em $ra.
+	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
 	
-	lw $a0, 8($s0)	# address of the right tree
-	addi $sp, $sp, -4
-	sw $s0, 0($sp)
-	jal preOrderLoop
-	lw $s0, 0($sp)
-	addi $sp, $sp, 4
+	lw $a0, 8($s0)		# Carrega em $a0 o endereço da árvore da direita.
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
+	jal preOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço
+				# de retorno em $ra.
+	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
+
 PreEnd:
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
+	lw $ra, 0($sp)		# Armazena em $ra o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
 	
-	jr $ra
+	jr $ra			# Faz um salto para a posição de memória armazenada em $ra.
 
+				# Rótulo para o percorrimento em pós-ordem.
 postorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
-	la $t0, ($a0)
+	la $t0, ($a0)		# Copia para $t0 o endereço da árvore binária armazenado em $a0.
 
-	la $a0, postOrderCall
+	la $a0, postOrderCall	# Impressão de texto com o tipo de percorrimento selecionado pelo usuário.
 	li $v0, 4
 	syscall
 	
@@ -322,10 +329,11 @@ POEnd:
 	
 	jr $ra
 
+				# Rótulo para o percorrimento em ordem.
 inorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
-	la $t0, ($a0)
+	la $t0, ($a0)		# Copia para $t0 o endereço da árvore binária armazenado em $a0.
 
-	la $a0, inOrderCall
+	la $a0, inOrderCall	# Impressão de texto com o tipo de percorrimento selecionado pelo usuário.
 	li $v0, 4
 	syscall
 	
