@@ -100,7 +100,7 @@ OptInsert:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 			
 OptPreOrder:
-	la $a0, ($s1)
+	la $a0, ($s1)		# Armazena no registrador $a0 o endereço da árvore binária que estava em $s1.
 	jal preorder		# Faz um salto para o rótulo de percorrimento em pré-ordem e salva em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -110,7 +110,7 @@ OptPreOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptInOrder:
-	la $a0, ($s1)	
+	la $a0, ($s1)		# Armazena no registrador $a0 o endereço da árvore binária que estava em $s1.
 	jal inorder		# Faz um salto para o rótulo de percorrimento em ordem e armazena em $ra o endereço de retorno.
 
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -120,7 +120,7 @@ OptInOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptPostOrder:
-	la $a0, ($s1)
+	la $a0, ($s1)		# Armazena no registrador $a0 o endereço da árvore binária que estava em $s1.
 	jal postorder		# Faz um salto para o rótulo de percorrimento em pós-ordem e registra em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -211,13 +211,12 @@ BTAdd:
 BTEnd:
 	la $v0, ($t2)		# Copia o valor de retorno de $t2 para o registrador de saída $v0.
 
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
+	lw $ra, 0($sp)		# Armazena no registrador da posição de retorno a posição atual da pilha.
+	addi $sp, $sp, 4	# Retorna uma posição na pilha.
 	
-	jr $ra
+	jr $ra			# Retorna para $ra.
 
-# $a0 : tree address
-preorder:
+preorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
 	la $t0, ($a0)
 
 	la $a0, preOrderCall
@@ -233,9 +232,11 @@ preorder:
 	syscall
 	
 	jr $ra
+	
 preOrderRun:
 	lw $a1, 4($t0)
 	lw $a0, 0($t0)
+	
 preOrderLoop:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
@@ -267,8 +268,7 @@ PreEnd:
 	
 	jr $ra
 
-# $a0 : tree address
-postorder:
+postorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
 	la $t0, ($a0)
 
 	la $a0, postOrderCall
@@ -319,8 +319,7 @@ POEnd:
 	
 	jr $ra
 
-# $a0 : tree address
-inorder:
+inorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binária.
 	la $t0, ($a0)
 
 	la $a0, inOrderCall
@@ -371,15 +370,17 @@ InEnd:
 	
 	jr $ra
 
-# $a0 : elem
-# $a1 : elem_num
-print_elem:
-	li $v0, 1
+print_elem:			# Este rótulo espera que em $a0 esteja o endereço do elemento a ser impresso e
+				# que $a1 esteja o número de elementos que faltam para o final da árvore, a fim
+				# de decidir se o delimitador utilizado é uma vírgula ou um ponto final.
+
+	li $v0, 1		# Comando para a impressão do inteiro cujo elemento está armazenado em $a0. 
 	lw $a0, 0($a0)
 	syscall
 	
-	beqz $a1, print_dot
-	la $a0, comma
+	beqz $a1, print_dot	# Caso o elemento a ser impresso seja o último, faz um desvio condicional para o
+				# rótulo print_dot a fim de imprimir o ponto final.
+	la $a0, comma		# Do contrário, prepara o registrador $a0 para a impressão da vírgula.
 	j print_delimiter
 print_dot:
 	la $a0, dot
@@ -387,4 +388,4 @@ print_delimiter:
 	li $v0, 4
 	syscall
 
-	jr $ra
+	jr $ra			# Retorna para a posição armazenada no registrador $ra.
