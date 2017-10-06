@@ -16,13 +16,15 @@
 # o monitor PEEG, não aceita a inserção do número inteiro zero (0), pois esse valor é utilizador para que o
 # usuário saia da opção de inserção e retorne ao menu inicial.
 #
+# Representação da estrutura:
+#
 # Tree:
 #	[0 - 3] -> address
 #	[4 - 7] -> number of nodes
 # Block:
 #	[0 - 3] -> elem
 #	[4 - 7] -> left tree
-#	[8 - 12] -> right tree
+#	[8 - 11] -> right tree
 
 .data
 	   	.align 2
@@ -41,8 +43,9 @@ optWrong:	.asciiz "Entrada inválida! Digite novamente: "
 
 .text
 main:
-	jal createBinaryTree
-	la $s1, 0($v0)	
+	jal createBinaryTree	#Faz um salto para o rótulo de inicialização da árvore binária e armazena o endereço
+	la $s1, 0($v0)		#de $ra.Depois, salva o endereço da estrutura de árvore (endereço do primeio nó e o
+				#número de elementos) no registrador $s1.
 menu:
 	li $v0, 4		#Impressão de quebra de linha na tela para formatação.
 	la $a0, newLine
@@ -86,12 +89,12 @@ menu:
 				# que representa uma entrada "errada" e o usuário é levado novamente ao menu.
 
 OptInsert:
-	la $a0, ($s1)
+	la $a0, ($s1)		# Armazena no registrador $a0 o endereço da árvore binária que estava em $s1.
 	jal insert		# Faz um salto para o rótulo de inserção de elementos e salva em $ra o endereço de retorno.
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 			
 OptPreOrder:			
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	lw $a0, ($s1)		
 	jal preorder		# Faz um salto para o rótulo de percorrimento em pré-ordem e salva em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -101,7 +104,7 @@ OptPreOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptInOrder:
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	lw $a0, ($s1)	
 	jal inorder		# Faz um salto para o rótulo de percorrimento em ordem e armazena em $ra o endereço de retorno.
 
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -111,7 +114,7 @@ OptInOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptPostOrder:
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI.
+	lw $a0, ($s1)
 	jal postorder		# Faz um salto para o rótulo de percorrimento em pós-ordem e registra em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -131,70 +134,76 @@ OptExit:
 	li $v0, 10		# Caso o rótulo de saída seja escolhido, o programa é encerrado.
 	syscall
 
-# return $v0 tree address
-createBinaryTree:
-	li $a0, 8
-	li $v0, 9
+createBinaryTree:		# Este rótulo retorna em $v0 o endereço da árvore binária.
+	li $a0, 8		# Armazena em $a0 o número de bytes a serem alocados. 
+	li $v0, 9		# Aloca dinamicamente em $v0 o número em bytes armazenado em $a0.
 	syscall
 	
-	sw $zero, 0($v0)	# tree address
-	sw $zero, 4($v0)	# set number of elements to zero
+	sw $zero, 0($v0)	# Inicializa o espaço alocado com o valor zero (primeiro campo).
+	sw $zero, 4($v0)	# Inicializa o espaço alocado com o valor zero (segundo campo).
 	
-	jr $ra
+	jr $ra			# Retorna para a posição da pilha registrada em $ra.
 
 insert:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -4	# Cresce em uma posição o tamanho da pilha para garantir que o endereço esteja live.
+	sw $ra, 0($sp)		# Armazena na nova posição de $sp o endereço de retorno $ra.
 
-	la $t2, ($a0)
+	la $t2, ($a0)		# Copia para $t2 o endereço da árvore binária que estava em $a0.
+	
 BTLoop:
-	la $a0, elemPrompt	# prompt the user to include a new element
-	li $v0, 4		# print_string call
+	la $a0, elemPrompt	# Impressão de texto para que o usuário digite o elemento a ser inserido na árvore.
+	li $v0, 4		
 	syscall
 	
-	li $v0, 5		# read_int call
-	syscall
+	li $v0, 5		# Realiza a leitura do número inteiro fornecido pelo usuário e copia essse valor para
+	syscall			# o registrador $t0.
+	la $t0, ($v0)
 	
-	la $t0, ($v0)		# input elem, $t0 = $v0
+	beq $t0, 0, BTEnd	# Compara se a entrada do usuário registrada em $t0 é igual ao número 0, o qual é
+				# definido como o valor de saída do modo de inserção.
+				
+	la $t3, ($t2)		# Copia para o registrador $t3 o endereço do nó de raiz (ou do nó atual).
 	
-	beq $t0, 0, BTEnd	# if equal to the end input, return tree address
+BTFind:				# Rótulo de loop para inserção do elemento na posição correta
+
+	lw $t1, 0($t3)		# Salva o elemento atual em $t1.
+	beq $t1, $zero, BTAdd	# Caso o elemento atual possua valor igual a zero, uma folha foi encontrada. Dessa forma,
+				# basta adicionar o elemento na árvore, mudando para o rótulo de adição.
 	
-	la $t3, ($t2)		# address of root (or current block)
-BTFind:
-	lw $t1, 0($t3)		# current adress
-	beq $t1, $zero, BTAdd	# if encounter a leaf, add element
+	la $t3, ($t1)		# Caso a posição atual não seja uma folha, copia para $t3 a posição do elemento atual.
 	
-	la $t3, ($t1)
+	lw $t1, 0($t3)		# Retorna a $t3 o valor do elemento atual.
+	blt $t0, $t1, BTLess	# Se o valor inserido pelo usuário for menor do que o valor do elemento atual, faz um 
+				# desvio para o rótulo BTLess.
 	
-	lw $t1, 0($t3)		# current element
-	blt $t0, $t1, BTLess	# if $t0 < $t1 goto BTLess
-	
-	addi $t3, $t3, 8	# set the current block to the right tree
-	j BTFind
+	addi $t3, $t3, 8	# Do contrário, designa a busca para a sub árvore da direita.
+	j BTFind		# Salto para continuar a busca pela posição de inserção.
 
 BTLess:
-	addi $t3, $t3, 4	# set the current block to the left tree
-	j BTFind
+	addi $t3, $t3, 4	# Designa o ponteiro do bloco atual para a sub árvore da esquerda.
+	j BTFind		# Salto para continuar a busca pela posição de inserção.
+	
 BTAdd:
-	li $a0, 12		# set to get 12bytes from heap
-	li $v0, 9		# sbrk call
+	li $a0, 12		# Armazena em $a0 o número de bytes que correspondem a um bloco.
+	li $v0, 9		# Realiza a alocação em $v0 conforme o valor armazenado em  $a0.  
 	syscall
 	
-	sw $v0, 0($t3)		# new block address
+	sw $v0, 0($t3)		# Armazena no endereço desejado o novo bloco.
 
-	sw $t0, 0($v0)		# store the element in the block
+	sw $t0, 0($v0)		# Armazena o valor do elemento inserido pelo usuário no novo bloco.
 	
-	sw $zero, 4($v0)	# set the address of the left tree to invalid
-	sw $zero, 8($v0)	# set the address of the right tree to invalid
+	sw $zero, 4($v0)	# Inicializa como zero o endereço da sub árvore à esquerda do novo nó.
+	sw $zero, 8($v0)	# Inicializa como zero o endereço da sub árvore à direita do novo nó.
 	
-	lw $t4, 4($t2)
-	addi $t4, $t4, 1
+	lw $t4, 4($t2)		# Armazena em $t4 o número de elementos da árvore binária antes da inserção.
+	addi $t4, $t4, 1	# Incrementa o número de elementos da árvore binária.
 	
-	sw $t4, 4($t2)
+	sw $t4, 4($t2)		# Retorna para a estrutura o número de elementos atualizado.
 	
-	j BTLoop
+	j BTLoop		# Faz um salto para o rótulo de loop da inserção.
+	
 BTEnd:
-	la $v0, ($t2)		# set the return register to the address
+	la $v0, ($t2)		# Copia o valor de retorno de $t2 para o registrador de saída $v0.
 
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
