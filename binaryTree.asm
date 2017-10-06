@@ -30,6 +30,8 @@ blocksize: 	.word 12
 elemPrompt:	.asciiz "Digite o novo elemento: "
 newLine:	.asciiz "\n"
 space:		.asciiz " "
+dot:		.asciiz "."
+comma:		.asciiz ","
 initMenu:	.asciiz "Digite o número correspondente à ação desejada: \n"
 opt1:		.asciiz "1) Inserção\n"
 opt2:		.asciiz "2) Percorrimento em pré-ordem\n"
@@ -37,6 +39,10 @@ opt3:		.asciiz "3) Percorrimento em ordem\n"
 opt4:		.asciiz "4) Percorrimento em pós-ordem\n"
 opt5:		.asciiz "5) Saída\n"
 optWrong:	.asciiz "Entrada inválida! Digite novamente: "
+inOrderCall:	.asciiz "Em-ordem\n"
+postOrderCall:	.asciiz "Pos-ordem\n"
+preOrderCall:	.asciiz "Pre-ordem\n"
+emptyTreeError:	.asciiz "Arvore vazia."
 
 
 .text
@@ -91,7 +97,7 @@ OptInsert:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 			
 OptPreOrder:			
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	la $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
 	jal preorder		# Faz um salto para o rótulo de percorrimento em pré-ordem e salva em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -101,7 +107,7 @@ OptPreOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptInOrder:
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
+	la $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI
 	jal inorder		# Faz um salto para o rótulo de percorrimento em ordem e armazena em $ra o endereço de retorno.
 
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -111,7 +117,7 @@ OptInOrder:
 	j menu			# Ao final da inserção, faz um salto para o rótulo de menu para retornar às opções.
 
 OptPostOrder:
-	lw $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI.
+	la $a0, ($s1)		# Armazena em $a0 o conteúdo do registrador $s1 para NÂO SEI.
 	jal postorder		# Faz um salto para o rótulo de percorrimento em pós-ordem e registra em $ra o endereço de retorno.
 	
 	li $v0, 4		# Imprime uma quebra de linha para formatação da saída.
@@ -203,6 +209,25 @@ BTEnd:
 
 # $a0 : tree address
 preorder:
+	la $t0, ($a0)
+
+	la $a0, preOrderCall
+	li $v0, 4
+	syscall
+	
+	lw $a0, 0($t0)
+
+	bne $a0, $zero, preOrderRun
+	
+	la $a0, emptyTreeError
+	li $v0, 4
+	syscall
+	
+	jr $ra
+preOrderRun:
+	lw $a1, 4($t0)
+	lw $a0, 0($t0)
+preOrderLoop:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	
@@ -210,28 +235,23 @@ preorder:
 	
 	la $s0, ($a0)
 
-	li $v0, 1
-	lw $a0, 0($s0)
-	syscall	
-	
-	li $v0, 4
-	la $a0, space
-	syscall
+	la $a0, 0($s0)
+	addi $a1, $a1, -1
+	jal print_elem
 
 	lw $a0, 4($s0)	# address of the left tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal preorder
+	jal preOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 	
 	lw $a0, 8($s0)	# address of the right tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal preorder
+	jal preOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
-	
 PreEnd:
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
@@ -240,6 +260,25 @@ PreEnd:
 
 # $a0 : tree address
 postorder:
+	la $t0, ($a0)
+
+	la $a0, postOrderCall
+	li $v0, 4
+	syscall
+	
+	lw $a0, 0($t0)
+
+	bne $a0, $zero, postOrderRun
+	
+	la $a0, emptyTreeError
+	li $v0, 4
+	syscall
+	
+	jr $ra
+postOrderRun:
+	lw $a1, 4($t0)
+	lw $a0, 0($t0)
+postOrderLoop:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	
@@ -250,24 +289,20 @@ postorder:
 	lw $a0, 4($s0)	# address of the left tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal postorder
+	jal postOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 	
 	lw $a0, 8($s0)	# address of the right tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal postorder
+	jal postOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 
-	li $v0, 1
-	lw $a0, 0($s0)
-	syscall	
-	
-	li $v0, 4
-	la $a0, space
-	syscall
+	la $a0, 0($s0)
+	addi $a1, $a1, -1
+	jal print_elem
 	
 POEnd:
 	lw $ra, 0($sp)
@@ -277,6 +312,25 @@ POEnd:
 
 # $a0 : tree address
 inorder:
+	la $t0, ($a0)
+
+	la $a0, inOrderCall
+	li $v0, 4
+	syscall
+	
+	lw $a0, 0($t0)
+
+	bne $a0, $zero, inOrderRun
+	
+	la $a0, emptyTreeError
+	li $v0, 4
+	syscall
+	
+	jr $ra
+inOrderRun:
+	lw $a1, 4($t0)
+	lw $a0, 0($t0)
+inOrderLoop:
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	
@@ -287,22 +341,18 @@ inorder:
 	lw $a0, 4($s0)	# address of the left tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal inorder
+	jal inOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 	
-	li $v0, 1
-	lw $a0, 0($s0)
-	syscall	
-	
-	li $v0, 4
-	la $a0, space
-	syscall
+	la $a0, 0($s0)
+	addi $a1, $a1, -1
+	jal print_elem
 	
 	lw $a0, 8($s0)	# address of the right tree
 	addi $sp, $sp, -4
 	sw $s0, 0($sp)
-	jal inorder
+	jal inOrderLoop
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 
@@ -310,4 +360,22 @@ InEnd:
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
 	
+	jr $ra
+
+# $a0 : elem
+# $a1 : elem_num
+print_elem:
+	li $v0, 1
+	lw $a0, 0($a0)
+	syscall
+	
+	beqz $a1, print_dot
+	la $a0, comma
+	j print_delimiter
+print_dot:
+	la $a0, dot
+print_delimiter:
+	li $v0, 4
+	syscall
+
 	jr $ra
