@@ -16,19 +16,22 @@
 # o monitor PEEG, não aceita a inserção do número inteiro zero (0), pois esse valor é utilizador para que o
 # usuário saia da opção de inserção e retorne ao menu inicial.
 #
-# Representação da estrutura:
+# Representação das estruturas:
 #
-# Tree:
-#	[0 - 3] -> address
-#	[4 - 7] -> number of nodes
-# Block:
-#	[0 - 3] -> elem
-#	[4 - 7] -> left tree
-#	[8 - 11] -> right tree
+# Arvore: Armazena o endereço da raiz e o número de elementos inseridos
+#		bytes 	-> descrição
+#		[0 - 3] -> endereço da raiz
+#		[4 - 7] -> número de elementos na árvore
+#
+# Bloco: Armazena o elemento e os endereços das sub-árvores da direita e esquerda
+#		bytes	 -> descrição
+#		[0 - 3]  -> elemento
+#		[4 - 7]  -> endereço da sub-árvore da esquerda
+#		[8 - 11] -> edereço da sub-árvore da direita
 
 .data
 	   	.align 2
-blocksize: 	.word 12
+
 elemPrompt:	.asciiz "Digite o novo elemento: "
 newLine:	.asciiz "\n"
 space:		.asciiz " "
