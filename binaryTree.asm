@@ -16,7 +16,6 @@
 # o monitor PEEG, não aceita a inserção do número inteiro zero (0), pois esse valor é utilizador para que o
 # usuário saia da opção de inserção e retorne ao menu inicial.
 #
-# Lixo?
 # Tree:
 #	[0 - 3] -> address
 #	[4 - 7] -> number of nodes
@@ -42,6 +41,8 @@ optWrong:	.asciiz "Entrada inválida! Digite novamente: "
 
 .text
 main:
+	jal createBinaryTree
+	la $s1, 0($v0)	
 menu:
 	li $v0, 4		#Impressão de quebra de linha na tela para formatação.
 	la $a0, newLine
@@ -85,12 +86,12 @@ menu:
 				# que representa uma entrada "errada" e o usuário é levado novamente ao menu.
 
 OptInsert:
-	jal createBinaryTree
-	lw $s1, 0($v0)	
+	la $a0, ($s1)
+	jal insert
 	j menu
 			
 OptPreOrder:			
-	la $a0, ($s1)
+	lw $a0, ($s1)
 	jal preorder
 	
 	li $v0, 4
@@ -99,7 +100,7 @@ OptPreOrder:
 	j menu
 
 OptInOrder:
-	la $a0, ($s1)
+	lw $a0, ($s1)
 	jal inorder
 
 	li $v0, 4
@@ -108,7 +109,7 @@ OptInOrder:
 	j menu
 
 OptPostOrder:																																																				
-	la $a0, ($s1)
+	lw $a0, ($s1)
 	jal postorder
 	
 	li $v0, 4
@@ -121,7 +122,7 @@ OptWrong:
 	li $v0, 4
 	la $a0, optWrong
 	syscall
-		
+	
 	j menu
 
 OptExit:		
@@ -130,16 +131,20 @@ OptExit:
 
 # return $v0 tree address
 createBinaryTree:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
-	
 	li $a0, 8
 	li $v0, 9
 	syscall
 	
-	la $t2, ($v0)		# get tree address
-	sw $zero, 0($t2)	# tree address
-	sw $zero, 4($t2)	# set number of elements to zero
+	sw $zero, 0($v0)	# tree address
+	sw $zero, 4($v0)	# set number of elements to zero
+	
+	jr $ra
+
+insert:
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	la $t2, ($a0)
 BTLoop:
 	la $a0, elemPrompt	# prompt the user to include a new element
 	li $v0, 4		# print_string call
