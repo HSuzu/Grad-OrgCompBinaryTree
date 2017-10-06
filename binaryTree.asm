@@ -373,25 +373,25 @@ inOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal inOrderLoop		# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
-	lw $s0, 0($sp)
-	addi $sp, $sp, 4
+	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
 	
-	la $a0, 0($s0)
-	addi $a1, $a1, -1
+	la $a0, 0($s0)		# Carrega em $a0 o endereço da pilha para a impressão do elemento.
+	addi $a1, $a1, -1	# Decrementa o número de nós da árvore para simbolizar que o nó foi visitado.
 	jal print_elem
 	
-	lw $a0, 8($s0)	# address of the right tree
-	addi $sp, $sp, -4
-	sw $s0, 0($sp)
-	jal inOrderLoop
-	lw $s0, 0($sp)
-	addi $sp, $sp, 4
+	lw $a0, 8($s0)		# Carrega em $a0 o endereço da árvore da direita.
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
+	jal inOrderLoop		# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
+	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
 
 InEnd:
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
+	lw $ra, 0($sp)		# Armazena em $ra o endereço da pilha.
+	addi $sp, $sp, 4	# Decrementa a pilha.
 	
-	jr $ra
+	jr $ra			# Faz um salto para a posição de memória armazenada em $ra.
 
 print_elem:			# Este rótulo espera que em $a0 esteja o endereço do elemento a ser impresso e
 				# que $a1 esteja o número de elementos que faltam para o final da árvore, a fim
