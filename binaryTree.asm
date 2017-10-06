@@ -344,30 +344,35 @@ inorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binár
 	li $v0, 4
 	syscall
 	
-	lw $a0, 0($t0)
+	lw $a0, 0($t0)		# Armazena em $a0 o valor do elemento correspondente ao primeiro nó da árvore.
 
-	bne $a0, $zero, inOrderRun
+	bne $a0, $zero, inOrderRun	# Caso o elemento não seja zero, a árvore não está vazia e um desvio condicional
+				    # é feito para o rótulo correspondente ao início do percorrimento em pós-ordem.
 	
-	la $a0, emptyTreeError
+	la $a0, emptyTreeError	# Do contrário, a árvore está vazia e um texto é impresso para que o usuário tenha
+				# conhecimento da informação.
 	li $v0, 4
 	syscall
 	
-	jr $ra
+	jr $ra			# Retorna o usuário para o menu inicial.
+	
 inOrderRun:
-	lw $a1, 4($t0)
-	lw $a0, 0($t0)
+	lw $a1, 4($t0)		# Armazena em $a1 o valor correspondente ao número de endereços da árvore binária.
+	lw $a0, 0($t0)		#[Testar se faz falta] Armazena em $a0 o valor do elemento correspondete ao primeiro nó da árvore.
+	
 inOrderLoop:
-	addi $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $ra, 0($sp)		# Armazena em $sp o endereço de retorno armazenado em $ra.
 	
-	beqz $a0, InEnd
+	beqz $a0, InEnd		# Faz um desvio caso o valor do elemento atual armazenado em $a0 seja igual a 0.
+				# Neste caso, o percorrimento chegou a uma folha.
 	
-	la $s0, ($a0)
+	la $s0, ($a0)		# Armazena em $s0 o endereço do elemento $a0.
 
-	lw $a0, 4($s0)	# address of the left tree
-	addi $sp, $sp, -4
-	sw $s0, 0($sp)
-	jal inOrderLoop
+	lw $a0, 4($s0)		# Carrega em $a0 o endereço da árvore da esquerda.
+	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
+	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
+	jal inOrderLoop		# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
 	lw $s0, 0($sp)
 	addi $sp, $sp, 4
 	
@@ -400,8 +405,10 @@ print_elem:			# Este rótulo espera que em $a0 esteja o endereço do elemento a 
 				# rótulo print_dot a fim de imprimir o ponto final.
 	la $a0, comma		# Do contrário, prepara o registrador $a0 para a impressão da vírgula.
 	j print_delimiter
+	
 print_dot:
 	la $a0, dot
+	
 print_delimiter:
 	li $v0, 4
 	syscall
