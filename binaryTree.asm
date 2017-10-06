@@ -1,3 +1,22 @@
+# Código desenvolvido para o primeiro trabalho da disciplina SSC0610 - Organização de Computadores Digitais I
+# da Universidade de São Paulo campus São Carlos.
+#
+# Docente: Prof. Dr. Francisco José Monaco
+# Monitor PEEG: Vitor P. Ribeiro
+# Monitor: Guilherme Prearo
+#
+# Alunos: Augusto Ribeiro Casto - 9771421
+#	  Gabriel Santos Ribeiro - 9771380
+#	  Henry Shinji Suzukawa - 9771504
+#	  Túlio Fernandes Rickli Costa - 9771491
+#
+# 	Este código ilustra a representação de uma árvore binária ordenada em Assembly MIPS. Dentro do trabalho 
+# existem algoritmos que permitem a inserção de números inteiros na estrutura, o percorrimento desta em ordem,
+# em pré-ordem e em pós-ordem. A estrutura implementada é alocada dinamicamente e, por definição acordada com 
+# o monitor PEEG, não aceita a inserção do número inteiro zero (0), pois esse valor é utilizador para que o
+# usuário saia da opção de inserção e retorne ao menu inicial.
+#
+# Lixo?
 # Tree:
 #	[0 - 3] -> address
 #	[4 - 7] -> number of nodes
@@ -24,52 +43,46 @@ optWrong:	.asciiz "Entrada inválida! Digite novamente: "
 .text
 main:
 menu:
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão de quebra de linha na tela para formatação.
 	la $a0, newLine
 	syscall
 
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de comando do menu.
 	la $a0, initMenu
 	syscall
 	
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de opção de comando correspondente à inserção.
 	la $a0, opt1
 	syscall
 
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de opção de comando correspondente à busca em pré-ordem.
 	la $a0, opt2
 	syscall	
 		
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de opção de comando correspondente à busca em ordem.
 	la $a0, opt3
 	syscall			
 
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de opção de comando correspondente à busca em pró-ordem.
 	la $a0, opt4
 	syscall			
 
-	#Text printing
-	li $v0, 4
+	li $v0, 4		#Impressão da string de opção de comando correspondente à opção de saída do programa.
 	la $a0, opt5
 	syscall		
 	
-	#Catching the selected option
-	li $v0, 5
+	li $v0, 5		#Recebe um inteiro inserido pelo usuário e armazena no registrador $t5.
 	syscall
 	move $t5, $v0
 	
-	beq $t5, 1, OptInsert
-	beq $t5, 2, OptPreOrder
-	beq $t5, 3, OptInOrder
+	beq $t5, 1, OptInsert	# Compara o inteiro armazenado em $t5 com os valores dados como opção pelo menu, de
+	beq $t5, 2, OptPreOrder # modo a fazer um desvio em caso de igualdade com um dos valores possíveis para o 
+	beq $t5, 3, OptInOrder  # rótulo correspondente.
 	beq $t5, 4, OptPostOrder
 	beq $t5, 5, OptExit
-	j OptWrong
+	j OptWrong		# Caso nenhuma das condições anteriores seja satisfeita, a entrada dada não está de
+				# acordo com o padrão fornecido pelo menu. Dessa forma,é feito um jump para o rótulo
+				# que representa uma entrada "errada" e o usuário é levado novamente ao menu.
 
 OptInsert:
 	jal createBinaryTree
