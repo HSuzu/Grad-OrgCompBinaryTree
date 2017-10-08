@@ -53,8 +53,8 @@ emptyTreeError:	.asciiz "Arvore vazia."
 .text
 main:
 	jal createBinaryTree	#Faz um salto para o rótulo de inicialização da árvore binária e armazena o endereço
-	la $s1, 0($v0)		#de $ra.Depois, salva o endereço da estrutura de árvore (endereço do primeio nó e o
-				#número de elementos) no registrador $s1.
+	la $s1, 0($v0)		#para retorno em $ra. Depois, salva o endereço da estrutura de árvore (endereço do
+				#primeio nó e o número de elementos) no registrador $s1.
 menu:
 	li $v0, 4		#Impressão de quebra de linha na tela para formatação.
 	la $a0, newLine
@@ -171,7 +171,7 @@ BTLoop:
 	beq $t0, 0, BTEnd	# Compara se a entrada do usuário registrada em $t0 é igual ao número 0, o qual é
 				# definido como o valor de saída do modo de inserção.
 				
-	la $t3, ($t2)		# Copia para o registrador $t3 o endereço do nó de raiz (ou do nó atual).
+	la $t3, ($t2)		# Copia para o registrador $t3 o endereço do nó de raiz/nó atual.
 	
 BTFind:				# Rótulo de loop para inserção do elemento na posição correta
 
@@ -227,9 +227,9 @@ preorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore biná
 	li $v0, 4
 	syscall
 	
-	lw $a0, 0($t0)		# Armazena em $a0 o valor do elemento correspondente ao primeiro nó da árvore.
+	lw $a0, 0($t0)		# Armazena em $a0 o valor do endereço da árvore.
 
-	bne $a0, $zero, preOrderRun # Caso o elemento não seja zero, a árvore não está vazia e um desvio condicional
+	bne $a0, $zero, preOrderRun # Caso não seja zero, a árvore não está vazia e um desvio condicional
 				    # é feito para o rótulo correspondente ao início do percorrimento em pré-ordem.
 	
 	la $a0, emptyTreeError  # Do contrário, a árvore está vazia e um texto é impresso para que o usuário tenha
@@ -251,7 +251,7 @@ preOrderLoop:
 	
 	la $s0, ($a0)		# Armazena em $s0 o endereço do elemento $a0.
 
-	la $a0, 0($s0)		#[Testar se faz falta]
+	la $a0, 0($s0)		
 	addi $a1, $a1, -1	# Decrementa o número de nós da árvore para simbolizar que o nó foi visitado.
 	jal print_elem		# Faz um desvio para o rótulo que imprime o elemento e salva o endereço de retorno em $ra.
 
@@ -260,7 +260,7 @@ preOrderLoop:
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal preOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
 				# de retorno em $ra.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 	
 	lw $a0, 8($s0)		# Carrega em $a0 o endereço da árvore da direita.
@@ -268,11 +268,11 @@ preOrderLoop:
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal preOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
 				# de retorno em $ra.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore..
 	addi $sp, $sp, 4	# Decrementa a pilha.
 
 PreEnd:
-	lw $ra, 0($sp)		# Armazena em $ra o endereço da pilha.
+	lw $ra, 0($sp)		# Armazena em $ra o endereço salvo na pilha.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 	
 	jr $ra			# Faz um salto para a posição de memória armazenada em $ra.
@@ -285,9 +285,9 @@ postorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore bin�
 	li $v0, 4
 	syscall
 	
-	lw $a0, 0($t0)		# Armazena em $a0 o valor do elemento correspondente ao primeiro nó da árvore.
+	lw $a0, 0($t0)		# Armazena em $a0 o endereço correspondente ao primeiro nó da árvore.
 
-	bne $a0, $zero, postOrderRun	# Caso o elemento não seja zero, a árvore não está vazia e um desvio condicional
+	bne $a0, $zero, postOrderRun	# Caso não seja zero, a árvore não está vazia e um desvio condicional
 				    # é feito para o rótulo correspondente ao início do percorrimento em pós-ordem.
 	
 	la $a0, emptyTreeError	# Do contrário, a árvore está vazia e um texto é impresso para que o usuário tenha
@@ -314,14 +314,14 @@ postOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal postOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 	
 	lw $a0, 8($s0)		# Carrega em $a0 o endereço da árvore da direita.
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal postOrderLoop	# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 
 	la $a0, 0($s0)		# Carrega em $a0 o endereço da pilha para a impressão do elemento.
@@ -342,9 +342,9 @@ inorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binár
 	li $v0, 4
 	syscall
 	
-	lw $a0, 0($t0)		# Armazena em $a0 o valor do elemento correspondente ao primeiro nó da árvore.
+	lw $a0, 0($t0)		# Armazena em $a0 o endereço correspondente ao primeiro nó da árvore.
 
-	bne $a0, $zero, inOrderRun	# Caso o elemento não seja zero, a árvore não está vazia e um desvio condicional
+	bne $a0, $zero, inOrderRun	# não seja zero, a árvore não está vazia e um desvio condicional
 				    # é feito para o rótulo correspondente ao início do percorrimento em pós-ordem.
 	
 	la $a0, emptyTreeError	# Do contrário, a árvore está vazia e um texto é impresso para que o usuário tenha
@@ -370,7 +370,7 @@ inOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal inOrderLoop		# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 	
 	la $a0, 0($s0)		# Carrega em $a0 o endereço da pilha para a impressão do elemento.
@@ -381,7 +381,7 @@ inOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
 	sw $s0, 0($sp)		# Armazena o endereço da árvore na pilha.
 	jal inOrderLoop		# Faz um salto para o rótulo do loop para continuar o percurso pela árvore e armazena o endereço.
-	lw $s0, 0($sp)		# Armazena na árvore o endereço da pilha.
+	lw $s0, 0($sp)		# Carrega o endereço da árvore.
 	addi $sp, $sp, 4	# Decrementa a pilha.
 
 InEnd:
