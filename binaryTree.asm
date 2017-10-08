@@ -241,7 +241,6 @@ preorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore biná
 preOrderRun:
 
 	lw $a1, 4($t0)		# Armazena em $a1 o valor correspondente ao número de endereços da árvore binária.
-	lw $a0, 0($t0)		#[Testar se faz falta] Armazena em $a0 o valor do elemento correspondete ao primeiro nó da árvore.
 	
 preOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
@@ -301,7 +300,6 @@ postorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore bin�
 postOrderRun:
 
 	lw $a1, 4($t0)		# Armazena em $a1 o valor correspondente ao número de endereços da árvore binária.
-	lw $a0, 0($t0)		#[Testar se faz falta] Armazena em $a0 o valor do elemento correspondete ao primeiro nó da árvore.
 	
 postOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
@@ -358,7 +356,6 @@ inorder:			# Este rótulo espera que em $a0 esteja o endereço da árvore binár
 	
 inOrderRun:
 	lw $a1, 4($t0)		# Armazena em $a1 o valor correspondente ao número de endereços da árvore binária.
-	lw $a0, 0($t0)		#[Testar se faz falta] Armazena em $a0 o valor do elemento correspondete ao primeiro nó da árvore.
 	
 inOrderLoop:
 	addi $sp, $sp, -4	# Incrementa a pilha em uma posição para garantir que o endereço esteja livre.
